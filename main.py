@@ -1,3 +1,5 @@
+# main.py — Interfaz gráfica principal (Tkinter) — Criptografía RSA
+# Importa la lógica desde rsa_logic.py y el manejo de archivos desde file_handler.py
 
 import tkinter as tk
 from tkinter import scrolledtext
@@ -15,6 +17,35 @@ dec_resultado = None
 ventana_proceso = None
 txt_proceso     = None
 proceso_logs    = []
+
+# ── TEMAS ────────────────────────────────────────────────────
+TEMAS = {
+    "claro": {
+        "BG":     "white",
+        "NEGRO":  "#111827",
+        "GRIS":   "#6b7280",
+        "BORDE":  "#e5e7eb",
+        "ENTRY":  "white",
+        "FG_ENT": "#111827",
+    },
+    "oscuro": {
+        "BG":     "#0d1117",
+        "NEGRO":  "#e6edf3",
+        "GRIS":   "#8b949e",
+        "BORDE":  "#30363d",
+        "ENTRY":  "#161b22",
+        "FG_ENT": "#e6edf3",
+    }
+}
+
+tema_actual = "claro"
+
+AZUL  = "#2563eb"
+VERDE = "#16a34a"
+ROJO  = "#dc2626"
+
+def T(key):
+    return TEMAS[tema_actual][key]
 
 # ── CONSOLA ──────────────────────────────────────────────────
 
@@ -128,8 +159,8 @@ def mostrar_candidatos_d():
     for valor in candidatos:
         rb = tk.Radiobutton(
             enc_frame_d, text=str(valor), variable=enc_d_valor, value=str(valor),
-            font=F_MONO, bg=BLANCO, fg=NEGRO,
-            activebackground=BLANCO, selectcolor=BLANCO)
+            font=F_MONO, bg=T("BG"), fg=T("NEGRO"),
+            activebackground=T("BG"), selectcolor=T("BG"))
         rb.pack(side="left", padx=2)
 
     enc_d_valor.set(str(candidatos[0]))
@@ -248,6 +279,59 @@ def mostrar_modo_desencriptar():
     ocultar_seccion(enc_frame)
     mostrar_seccion(dec_frame)
 
+# ── CAMBIO DE TEMA ───────────────────────────────────────────
+
+todos_los_widgets = []
+
+def registrar_widget(w, tipo="frame"):
+    todos_los_widgets.append((w, tipo))
+    return w
+
+def aplicar_tema():
+    bg    = T("BG")
+    fg    = T("NEGRO")
+    gris  = T("GRIS")
+    borde = T("BORDE")
+    entry = T("ENTRY")
+    fg_e  = T("FG_ENT")
+
+    root.configure(bg=bg)
+    main_canvas.configure(bg=bg)
+    barra_inferior.configure(bg=bg)
+
+    for widget, tipo in todos_los_widgets:
+        try:
+            if tipo == "frame":
+                widget.configure(bg=bg)
+            elif tipo == "label":
+                widget.configure(bg=bg, fg=fg)
+            elif tipo == "label_gris":
+                widget.configure(bg=bg, fg=gris)
+            elif tipo == "label_verde":
+                widget.configure(bg=bg, fg=VERDE)
+            elif tipo == "label_rojo":
+                widget.configure(bg=bg, fg=ROJO)
+            elif tipo == "sep":
+                widget.configure(bg=borde)
+            elif tipo == "entry":
+                widget.configure(bg=entry, fg=fg_e, insertbackground=fg_e)
+            elif tipo == "text":
+                widget.configure(bg=entry, fg=fg_e, insertbackground=fg_e)
+            elif tipo == "canvas":
+                widget.configure(bg=bg)
+        except Exception:
+            pass
+
+    btn_tema.configure(
+        text="☀️ Modo claro" if tema_actual == "oscuro" else "🌙 Modo oscuro",
+        bg=bg, fg=fg, activebackground=bg, activeforeground=fg
+    )
+
+def toggle_tema():
+    global tema_actual
+    tema_actual = "oscuro" if tema_actual == "claro" else "claro"
+    aplicar_tema()
+
 # ============================================================
 #   INTERFAZ
 # ============================================================
@@ -258,28 +342,21 @@ root.geometry("600x820")
 root.configure(bg="white")
 root.resizable(True, True)
 
-AZUL   = "#2563eb"
-VERDE  = "#16a34a"
-ROJO   = "#dc2626"
-GRIS   = "#6b7280"
-BORDE  = "#e5e7eb"
-BLANCO = "white"
-NEGRO  = "#111827"
-
 F      = ("Arial", 10)
 F_B    = ("Arial", 10, "bold")
 F_T    = ("Arial", 13, "bold")
 F_MONO = ("Courier New", 10)
 
 # ── SCROLL PRINCIPAL ─────────────────────────────────────────
-main_canvas = tk.Canvas(root, bg=BLANCO, highlightthickness=0)
+main_canvas = tk.Canvas(root, bg="white", highlightthickness=0)
 scrollbar   = tk.Scrollbar(root, orient="vertical", command=main_canvas.yview)
 main_canvas.configure(yscrollcommand=scrollbar.set)
 scrollbar.pack(side="right", fill="y")
 main_canvas.pack(side="left", fill="both", expand=True)
 
-scroll_frame  = tk.Frame(main_canvas, bg=BLANCO)
+scroll_frame  = tk.Frame(main_canvas, bg="white")
 scroll_window = main_canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
+registrar_widget(scroll_frame, "frame")
 
 def on_frame_configure(event):
     main_canvas.configure(scrollregion=main_canvas.bbox("all"))
@@ -295,16 +372,21 @@ main_canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
 
 def hacer_seccion_frame(parent, titulo):
-    contenedor = tk.Frame(parent, bg=BLANCO)
-    tk.Label(contenedor, text=titulo, font=F_T, bg=BLANCO, fg=NEGRO).pack(anchor="w", padx=24, pady=(18, 4))
-    tk.Frame(contenedor, bg=BORDE, height=1).pack(fill="x", padx=24)
+    contenedor = tk.Frame(parent, bg=T("BG"))
+    registrar_widget(contenedor, "frame")
+    lbl = tk.Label(contenedor, text=titulo, font=F_T, bg=T("BG"), fg=T("NEGRO"))
+    lbl.pack(anchor="w", padx=24, pady=(18, 4))
+    registrar_widget(lbl, "label")
+    sep = tk.Frame(contenedor, bg=T("BORDE"), height=1)
+    sep.pack(fill="x", padx=24)
+    registrar_widget(sep, "sep")
     return contenedor
 
 def boton(parent, texto, color, comando=None, lado=None):
-    b = tk.Button(parent, text=texto, bg=color, fg=BLANCO,
+    b = tk.Button(parent, text=texto, bg=color, fg="white",
                   font=F_B, relief="flat", cursor="hand2",
                   padx=16, pady=7, bd=0,
-                  activebackground=color, activeforeground=BLANCO,
+                  activebackground=color, activeforeground="white",
                   command=comando)
     if lado:
         b.pack(side=lado, padx=(0, 10))
@@ -313,59 +395,81 @@ def boton(parent, texto, color, comando=None, lado=None):
     return b
 
 # ── SELECTOR DE MODO ─────────────────────────────────────────
-modo_frame = tk.Frame(scroll_frame, bg=BLANCO)
+modo_frame = tk.Frame(scroll_frame, bg="white")
 modo_frame.pack(fill="x", pady=0)
+registrar_widget(modo_frame, "frame")
 
-tk.Label(modo_frame, text="Criptografía RSA", font=("Arial", 16, "bold"),
-         bg=BLANCO, fg=NEGRO).pack(anchor="w", padx=24, pady=(20, 4))
-tk.Frame(modo_frame, bg=BORDE, height=1).pack(fill="x", padx=24)
+lbl_titulo = tk.Label(modo_frame, text="Criptografía RSA", font=("Arial", 16, "bold"),
+                      bg="white", fg="#111827")
+lbl_titulo.pack(anchor="w", padx=24, pady=(20, 4))
+registrar_widget(lbl_titulo, "label")
 
-tk.Label(modo_frame, text="¿Qué deseas hacer?", font=F_B,
-         bg=BLANCO, fg=GRIS).pack(anchor="w", padx=24, pady=(10, 4))
+sep_modo = tk.Frame(modo_frame, bg="#e5e7eb", height=1)
+sep_modo.pack(fill="x", padx=24)
+registrar_widget(sep_modo, "sep")
 
-fila_modo = tk.Frame(modo_frame, bg=BLANCO)
+lbl_que = tk.Label(modo_frame, text="¿Qué deseas hacer?", font=F_B,
+                   bg="white", fg="#6b7280")
+lbl_que.pack(anchor="w", padx=24, pady=(10, 4))
+registrar_widget(lbl_que, "label_gris")
+
+fila_modo = tk.Frame(modo_frame, bg="white")
 fila_modo.pack(anchor="w", padx=24, pady=(0, 14))
+registrar_widget(fila_modo, "frame")
 boton(fila_modo, " Encriptar",    AZUL, comando=mostrar_modo_encriptar,    lado="left")
-boton(fila_modo, " Desencriptar", GRIS, comando=mostrar_modo_desencriptar, lado="left")
+boton(fila_modo, " Desencriptar", "#6b7280", comando=mostrar_modo_desencriptar, lado="left")
 
 # ── MODO ENCRIPTAR ───────────────────────────────────────────
-enc_frame = tk.Frame(scroll_frame, bg=BLANCO)
+enc_frame = tk.Frame(scroll_frame, bg="white")
+registrar_widget(enc_frame, "frame")
 
 enc_sec1 = hacer_seccion_frame(enc_frame, "1. Números primos")
 enc_sec1.pack(fill="x")
 
-fila1 = tk.Frame(enc_sec1, bg=BLANCO)
+fila1 = tk.Frame(enc_sec1, bg="white")
 fila1.pack(anchor="w", padx=24, pady=8)
+registrar_widget(fila1, "frame")
 
-tk.Label(fila1, text="p =", font=F_B, bg=BLANCO, fg=NEGRO).pack(side="left")
+lbl_p = tk.Label(fila1, text="p =", font=F_B, bg="white", fg="#111827")
+lbl_p.pack(side="left")
+registrar_widget(lbl_p, "label")
 enc_campo_p = tk.Entry(fila1, width=6, font=F_MONO, relief="solid", bd=1)
 enc_campo_p.pack(side="left", padx=(6, 4))
-enc_estado_p = tk.Label(fila1, text="", font=("Arial", 9), bg=BLANCO, width=12)
+registrar_widget(enc_campo_p, "entry")
+enc_estado_p = tk.Label(fila1, text="", font=("Arial", 9), bg="white", width=12)
 enc_estado_p.pack(side="left")
+registrar_widget(enc_estado_p, "label")
 
-tk.Label(fila1, text="q =", font=F_B, bg=BLANCO, fg=NEGRO).pack(side="left", padx=(20, 0))
+lbl_q = tk.Label(fila1, text="q =", font=F_B, bg="white", fg="#111827")
+lbl_q.pack(side="left", padx=(20, 0))
+registrar_widget(lbl_q, "label")
 enc_campo_q = tk.Entry(fila1, width=6, font=F_MONO, relief="solid", bd=1)
 enc_campo_q.pack(side="left", padx=(6, 4))
-enc_estado_q = tk.Label(fila1, text="", font=("Arial", 9), bg=BLANCO, width=12)
+registrar_widget(enc_campo_q, "entry")
+enc_estado_q = tk.Label(fila1, text="", font=("Arial", 9), bg="white", width=12)
 enc_estado_q.pack(side="left")
+registrar_widget(enc_estado_q, "label")
 
 tk.Button(fila1, text="Calcular n y φ(n)", bg=AZUL, fg="white", font=F_B,
           relief="flat", cursor="hand2", padx=16, pady=7, bd=0,
           activebackground=AZUL, activeforeground="white",
           command=calcular_n_euler).pack(side="left", padx=(20, 0))
 
-enc_label_advertencia = tk.Label(enc_sec1, text="", font=("Arial", 9), bg=BLANCO, fg=ROJO)
+enc_label_advertencia = tk.Label(enc_sec1, text="", font=("Arial", 9), bg="white", fg=ROJO)
 enc_label_advertencia.pack(anchor="w", padx=24)
+registrar_widget(enc_label_advertencia, "frame")
 
 enc_sec2_frame = hacer_seccion_frame(enc_frame, "2. Seleccionar d")
 
-enc_canvas_d = tk.Canvas(enc_sec2_frame, bg=BLANCO, height=35, highlightthickness=0)
+enc_canvas_d = tk.Canvas(enc_sec2_frame, bg="white", height=35, highlightthickness=0)
+registrar_widget(enc_canvas_d, "canvas")
 enc_scroll_d = tk.Scrollbar(enc_sec2_frame, orient="horizontal", command=enc_canvas_d.xview)
 enc_canvas_d.configure(xscrollcommand=enc_scroll_d.set)
 enc_canvas_d.pack(fill="x", padx=24)
 enc_scroll_d.pack(fill="x", padx=24)
 
-enc_frame_d = tk.Frame(enc_canvas_d, bg=BLANCO)
+enc_frame_d = tk.Frame(enc_canvas_d, bg="white")
+registrar_widget(enc_frame_d, "frame")
 enc_canvas_d.create_window((0, 0), window=enc_frame_d, anchor="nw")
 
 def enc_actualizar_scroll(event):
@@ -377,29 +481,38 @@ boton(enc_sec2_frame, "Confirmar d y calcular e", AZUL, comando=confirmar_d)
 
 enc_sec3_frame = hacer_seccion_frame(enc_frame, "3. Claves generadas")
 
-enc_etiqueta_clave_publica = tk.Label(enc_sec3_frame, text="Clave pública:   —", font=F_MONO, bg=BLANCO, fg=VERDE)
+enc_etiqueta_clave_publica = tk.Label(enc_sec3_frame, text="Clave pública:   —", font=F_MONO, bg="white", fg=VERDE)
 enc_etiqueta_clave_publica.pack(anchor="w", padx=24, pady=2)
-enc_etiqueta_clave_privada = tk.Label(enc_sec3_frame, text="Clave privada:   —", font=F_MONO, bg=BLANCO, fg=ROJO)
-enc_etiqueta_clave_privada.pack(anchor="w", padx=24, pady=(2, 4))
+registrar_widget(enc_etiqueta_clave_publica, "label_verde")
 
-fila_exportar = tk.Frame(enc_sec3_frame, bg=BLANCO)
+enc_etiqueta_clave_privada = tk.Label(enc_sec3_frame, text="Clave privada:   —", font=F_MONO, bg="white", fg=ROJO)
+enc_etiqueta_clave_privada.pack(anchor="w", padx=24, pady=(2, 4))
+registrar_widget(enc_etiqueta_clave_privada, "label_rojo")
+
+fila_exportar = tk.Frame(enc_sec3_frame, bg="white")
 fila_exportar.pack(anchor="w", padx=24, pady=(0, 4))
+registrar_widget(fila_exportar, "frame")
 boton(fila_exportar, " Exportar claves (.txt)", VERDE, comando=exportar_claves, lado="left")
 
-enc_label_exportar_aviso = tk.Label(enc_sec3_frame, text="", font=("Arial", 9), bg=BLANCO, fg=ROJO)
+enc_label_exportar_aviso = tk.Label(enc_sec3_frame, text="", font=("Arial", 9), bg="white", fg=ROJO)
 enc_label_exportar_aviso.pack(anchor="w", padx=24, pady=(0, 10))
+registrar_widget(enc_label_exportar_aviso, "frame")
 
 enc_sec4_frame = hacer_seccion_frame(enc_frame, "4. Encriptar mensaje")
 
-tk.Label(enc_sec4_frame, text="Escribe o carga el mensaje a encriptar:",
-         font=F, bg=BLANCO, fg=GRIS).pack(anchor="w", padx=24, pady=(8, 2))
+lbl_enc_msg = tk.Label(enc_sec4_frame, text="Escribe o carga el mensaje a encriptar:",
+                       font=F, bg="white", fg="#6b7280")
+lbl_enc_msg.pack(anchor="w", padx=24, pady=(8, 2))
+registrar_widget(lbl_enc_msg, "label_gris")
 
 enc_txt_mensaje = tk.Text(enc_sec4_frame, height=3, font=F_MONO, relief="solid", bd=1,
-                          padx=8, pady=6, bg=BLANCO, fg=NEGRO)
+                          padx=8, pady=6, bg="white", fg="#111827")
 enc_txt_mensaje.pack(fill="x", padx=24, pady=(0, 4))
+registrar_widget(enc_txt_mensaje, "text")
 
-fila_enc_botones = tk.Frame(enc_sec4_frame, bg=BLANCO)
+fila_enc_botones = tk.Frame(enc_sec4_frame, bg="white")
 fila_enc_botones.pack(anchor="w", padx=24, pady=(0, 10))
+registrar_widget(fila_enc_botones, "frame")
 boton(fila_enc_botones, "Abrir archivo .txt",   VERDE, lado="left", comando=abrir_archivo_enc)
 boton(fila_enc_botones, "Encriptar",            AZUL,  lado="left", comando=encriptar_mensaje)
 boton(fila_enc_botones, "Guardar mensaje .txt", VERDE, lado="left", comando=guardar_mensaje_enc)
@@ -407,40 +520,54 @@ boton(fila_enc_botones, "Guardar mensaje .txt", VERDE, lado="left", comando=guar
 enc_sec5_frame = enc_sec4_frame
 
 # ── MODO DESENCRIPTAR ────────────────────────────────────────
-dec_frame = tk.Frame(scroll_frame, bg=BLANCO)
+dec_frame = tk.Frame(scroll_frame, bg="white")
+registrar_widget(dec_frame, "frame")
 
 dec_sec1 = hacer_seccion_frame(dec_frame, "1. Importar claves RSA")
 dec_sec1.pack(fill="x")
 
-tk.Label(dec_sec1, text="Carga el archivo .txt con las claves (n, d):",
-         font=F, bg=BLANCO, fg=GRIS).pack(anchor="w", padx=24, pady=(8, 2))
+lbl_dec_clave = tk.Label(dec_sec1, text="Carga el archivo .txt con las claves (n, d):",
+                         font=F, bg="white", fg="#6b7280")
+lbl_dec_clave.pack(anchor="w", padx=24, pady=(8, 2))
+registrar_widget(lbl_dec_clave, "label_gris")
 
-dec_etiqueta_claves = tk.Label(dec_sec1, text="Claves cargadas:   —", font=F_MONO, bg=BLANCO, fg=VERDE)
+dec_etiqueta_claves = tk.Label(dec_sec1, text="Claves cargadas:   —", font=F_MONO, bg="white", fg=VERDE)
 dec_etiqueta_claves.pack(anchor="w", padx=24, pady=(0, 4))
+registrar_widget(dec_etiqueta_claves, "label_verde")
 
 boton(dec_sec1, " Importar claves (.txt)", AZUL, comando=importar_claves)
 
-tk.Frame(dec_frame, bg=BORDE, height=1).pack(fill="x", padx=24, pady=4)
+sep_dec = tk.Frame(dec_frame, bg="#e5e7eb", height=1)
+sep_dec.pack(fill="x", padx=24, pady=4)
+registrar_widget(sep_dec, "sep")
 
 dec_sec2 = hacer_seccion_frame(dec_frame, "2. Desencriptar mensaje")
 
-tk.Label(dec_sec2, text="Pega o carga el mensaje encriptado (Base64):",
-         font=F, bg=BLANCO, fg=GRIS).pack(anchor="w", padx=24, pady=(8, 2))
+lbl_dec_msg = tk.Label(dec_sec2, text="Pega o carga el mensaje encriptado (Base64):",
+                       font=F, bg="white", fg="#6b7280")
+lbl_dec_msg.pack(anchor="w", padx=24, pady=(8, 2))
+registrar_widget(lbl_dec_msg, "label_gris")
 
 dec_txt_mensaje = tk.Text(dec_sec2, height=3, font=F_MONO, relief="solid", bd=1,
-                          padx=8, pady=6, bg=BLANCO, fg=NEGRO)
+                          padx=8, pady=6, bg="white", fg="#111827")
 dec_txt_mensaje.pack(fill="x", padx=24, pady=(0, 4))
+registrar_widget(dec_txt_mensaje, "text")
 
-fila_dec_botones = tk.Frame(dec_sec2, bg=BLANCO)
+fila_dec_botones = tk.Frame(dec_sec2, bg="white")
 fila_dec_botones.pack(anchor="w", padx=24, pady=(0, 10))
-boton(fila_dec_botones, "Abrir archivo .txt",     VERDE, lado="left", comando=abrir_archivo_dec)
-boton(fila_dec_botones, "Desencriptar",           AZUL,  lado="left", comando=desencriptar_mensaje)
-boton(fila_dec_botones, "Guardar mensaje .txt",   VERDE, lado="left", comando=guardar_mensaje_dec)
+registrar_widget(fila_dec_botones, "frame")
+boton(fila_dec_botones, "Abrir archivo .txt",   VERDE, lado="left", comando=abrir_archivo_dec)
+boton(fila_dec_botones, "Desencriptar",         AZUL,  lado="left", comando=desencriptar_mensaje)
+boton(fila_dec_botones, "Guardar mensaje .txt", VERDE, lado="left", comando=guardar_mensaje_dec)
 
-tk.Label(dec_sec2, text="Mensaje desencriptado:", font=F, bg=BLANCO, fg=GRIS).pack(anchor="w", padx=24, pady=(0, 4))
+lbl_dec_res = tk.Label(dec_sec2, text="Mensaje desencriptado:", font=F, bg="white", fg="#6b7280")
+lbl_dec_res.pack(anchor="w", padx=24, pady=(0, 4))
+registrar_widget(lbl_dec_res, "label_gris")
+
 dec_txt_resultado = tk.Text(dec_sec2, height=3, font=F_MONO, relief="solid", bd=1,
-                            padx=8, pady=6, bg=BLANCO, fg=NEGRO, state="disabled")
+                            padx=8, pady=6, bg="white", fg="#111827", state="disabled")
 dec_txt_resultado.pack(fill="x", padx=24, pady=(0, 14))
+registrar_widget(dec_txt_resultado, "text")
 
 # ── BARRA INFERIOR ───────────────────────────────────────────
 
@@ -452,13 +579,13 @@ def abrir_ventana_proceso():
     ventana_proceso = tk.Toplevel(root)
     ventana_proceso.title("Proceso / Resultados")
     ventana_proceso.geometry("620x420")
-    ventana_proceso.configure(bg=BLANCO)
+    ventana_proceso.configure(bg=T("BG"))
     ventana_proceso.resizable(True, True)
     tk.Label(ventana_proceso, text="Proceso y Resultados",
-             font=F_T, bg=BLANCO, fg=NEGRO).pack(anchor="w", padx=24, pady=(18, 4))
+             font=F_T, bg=T("BG"), fg=T("NEGRO")).pack(anchor="w", padx=24, pady=(18, 4))
     txt_proceso = scrolledtext.ScrolledText(
         ventana_proceso, height=18, font=F_MONO, relief="solid", bd=1,
-        bg=BLANCO, fg=NEGRO, padx=8, pady=8, state="disabled", wrap="word")
+        bg=T("ENTRY"), fg=T("NEGRO"), padx=8, pady=8, state="disabled", wrap="word")
     txt_proceso.pack(fill="both", expand=True, padx=24, pady=(0, 10))
     if proceso_logs:
         txt_proceso.configure(state="normal")
@@ -476,27 +603,42 @@ def abrir_ventana_proceso():
         txt_proceso = None
 
     ventana_proceso.protocol("WM_DELETE_WINDOW", cerrar_ventana)
-    fila_botones = tk.Frame(ventana_proceso, bg=BLANCO)
+    fila_botones = tk.Frame(ventana_proceso, bg=T("BG"))
     fila_botones.pack(anchor="w", padx=24, pady=6)
-    boton(fila_botones, "Cerrar",  GRIS, comando=cerrar_ventana,    lado="left")
-    boton(fila_botones, "Limpiar", GRIS, comando=limpiar_resultado, lado="left")
+    boton(fila_botones, "Cerrar",  "#6b7280", comando=cerrar_ventana,    lado="left")
+    boton(fila_botones, "Limpiar", "#6b7280", comando=limpiar_resultado, lado="left")
 
 
-barra_inferior = tk.Frame(root, bg=BLANCO)
+barra_inferior = tk.Frame(root, bg="white")
 barra_inferior.pack(side="bottom", fill="x")
+registrar_widget(barra_inferior, "frame")
 
-tk.Frame(barra_inferior, bg=BORDE, height=1).pack(fill="x", pady=(6, 0))
+sep_barra = tk.Frame(barra_inferior, bg="#e5e7eb", height=1)
+sep_barra.pack(fill="x", pady=(6, 0))
+registrar_widget(sep_barra, "sep")
 
-fila_ver = tk.Frame(barra_inferior, bg=BLANCO)
+fila_ver = tk.Frame(barra_inferior, bg="white")
 fila_ver.pack(side="left", padx=24, pady=6)
+registrar_widget(fila_ver, "frame")
 
-tk.Button(fila_ver, text="Ver proceso", bg=AZUL, fg=BLANCO,
+tk.Button(fila_ver, text="Ver proceso", bg=AZUL, fg="white",
           font=F_B, relief="flat", cursor="hand2",
           padx=16, pady=7, bd=0,
-          activebackground=AZUL, activeforeground=BLANCO,
+          activebackground=AZUL, activeforeground="white",
           command=abrir_ventana_proceso).pack(side="left", padx=(0, 10))
-tk.Label(fila_ver, text="Resultados / Proceso", font=F_T,
-         bg=BLANCO, fg=NEGRO).pack(side="left")
+
+lbl_proceso = tk.Label(fila_ver, text="Resultados / Proceso", font=F_T,
+                       bg="white", fg="#111827")
+lbl_proceso.pack(side="left")
+registrar_widget(lbl_proceso, "label")
+
+# Botón de tema
+btn_tema = tk.Button(barra_inferior, text="🌙 Modo oscuro",
+                     bg="white", fg="#111827", font=F_B,
+                     relief="flat", cursor="hand2", padx=16, pady=7, bd=0,
+                     activebackground="white", activeforeground="#111827",
+                     command=toggle_tema)
+btn_tema.pack(side="right", padx=24, pady=6)
 
 mostrar_modo_encriptar()
 root.mainloop()
