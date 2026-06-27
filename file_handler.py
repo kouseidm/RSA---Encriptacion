@@ -1,4 +1,3 @@
-# file_handler.py — Manejo de archivos: exportar e importar claves y mensajes
 
 from tkinter import filedialog
 
