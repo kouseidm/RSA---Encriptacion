@@ -85,5 +85,5 @@ python main.py
 | Autor | GitHub |
 |-------|--------|
 | Alexis Huamán | [@kouseidm](https://github.com/kouseidm) |
-| Antony Yomar | [@antonyyomar-dev](https://github.com/antonyyomar-dev) |
+| Antony Peña | [@antonyyomar-dev](https://github.com/antonyyomar-dev) |
 | Joseph Hidalgo | [@darkjoshid](https://github.com/darkjoshid) |
