@@ -1,6 +1,6 @@
-# 🔐 RSA Encryption App
+# 🔐 RSA Encriptación
 
-Implementación del algoritmo de cifrado **RSA** desde cero en Python con interfaz gráfica (Tkinter).
+Implementación del algoritmo de cifrado **RSA** desde cero en Python con interfaz gráfica.
 
 ---
 
