@@ -80,13 +80,10 @@ python main.py
 
 ---
 
-## 🛠️ Tecnologías
+## 👥 Autores
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Tkinter](https://img.shields.io/badge/Tkinter-GUI-blue?style=for-the-badge)
-
----
-
-## 👤 Autor
-
-**Alexis Huamán Flores** — [@kouseidm](https://github.com/kouseidm)
+| Autor | GitHub |
+|-------|--------|
+| Alexis Huamán | [@kouseidm](https://github.com/kouseidm) |
+| Antony Yomar | [@antonyyomar-dev](https://github.com/antonyyomar-dev) |
+| Joseph Hidalgo | [@darkjoshid](https://github.com/darkjoshid) |
