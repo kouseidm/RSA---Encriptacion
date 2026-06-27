@@ -1,4 +1,3 @@
-# rsa_logic.py — Funciones matemáticas del algoritmo RSA
 
 # VARIABLES GLOBALES ───────────────────────────────────────────
 n_global      = None
