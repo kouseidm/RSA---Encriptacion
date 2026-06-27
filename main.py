@@ -1,5 +1,3 @@
-# main.py — Interfaz gráfica principal (Tkinter) — Criptografía RSA
-# Importa la lógica desde rsa_logic.py y el manejo de archivos desde file_handler.py
 
 import tkinter as tk
 from tkinter import scrolledtext
